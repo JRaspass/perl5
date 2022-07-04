@@ -3972,6 +3972,29 @@ Perl_rpeep(pTHX_ OP *o)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
             break;
 
+        /*
+            7     <|> grepwhile(other->8)[t4] vK ->a
+            6        <@> grepstart K ->7
+            3           <0> pushmark s ->4
+            -           <1> null lK/1 ->4
+            -              <1> null sK/1 ->7
+            -                 <@> scope sK ->-
+            -                    <;> ex-nextstate(main 2 -e:1) v ->8
+            9                    <1> defined sK/1 ->7
+
+            ↓
+
+            7     <|> grepwhile(other->8)[t4] vK ->a
+            6        <@> grepstart K ->7
+            3           <0> pushmark s ->4
+            -           <1> null lK/1 ->4
+            9              <1> defined sK/1 ->7
+        */
+        case OP_GREPSTART:
+            Perl_warner(aTHX_ WARN_INTERNAL, "grep start %d %d\n",
+                o->op_type, cLISTOPo->op_first->op_type);
+            break;
+
         case OP_CUSTOM: {
             Perl_cpeep_t cpeep =
                 XopENTRYCUSTOM(o, xop_peep);

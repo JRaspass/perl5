@@ -169,6 +169,31 @@ XS(XS_builtin_func1_scalar)
     XSRETURN(1);
 }
 
+XS(XS_builtin_funcN_scalar);
+XS(XS_builtin_funcN_scalar)
+{
+    dXSARGS;
+    dXSI32;
+
+    warn_experimental_builtin(PL_op_name[ix], true);
+
+    switch(ix) {
+        case OP_MAX:
+            Perl_pp_max(aTHX);
+            break;
+
+        case OP_MIN:
+            Perl_pp_min(aTHX);
+            break;
+
+        default:
+            Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
+                           " for xs_builtin_funcN_scalar()", (IV) ix);
+    }
+
+    XSRETURN(1);
+}
+
 XS(XS_builtin_trim);
 XS(XS_builtin_trim)
 {
@@ -508,6 +533,9 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },
     { "builtin::export_lexically", &XS_builtin_export_lexically, NULL, 0 },
 
+    { "builtin::max", &XS_builtin_funcN_scalar, &ck_builtin_funcN, OP_MAX },
+    { "builtin::min", &XS_builtin_funcN_scalar, &ck_builtin_funcN, OP_MIN },
+
     { NULL, NULL, NULL, 0 }
 };
 
@@ -552,6 +580,8 @@ Perl_boot_core_builtin(pTHX)
             proto = "";
         else if(builtin->checker == &ck_builtin_func1)
             proto = "$";
+        else if(builtin->checker == &ck_builtin_funcN)
+            proto = "@";
 
         CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
         XSANY.any_i32 = builtin->ckval;

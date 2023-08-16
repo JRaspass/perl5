@@ -564,6 +564,8 @@ EXTCONST char* const PL_op_name[] INIT({
 	"ceil",
 	"floor",
 	"is_tainted",
+	"max",
+	"min",
 	"helemexistsor",
 	"methstart",
 	"initfield",
@@ -990,6 +992,8 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"ceil",
 	"floor",
 	"is_tainted",
+	"max",
+	"min",
 	"hash element exists or",
 	"method start",
 	"initialise field",
@@ -1421,6 +1425,8 @@ INIT({
 	Perl_pp_ceil,
 	Perl_pp_floor,
 	Perl_pp_is_tainted,
+	Perl_pp_max,
+	Perl_pp_min,
 	Perl_pp_helemexistsor,
 	Perl_pp_methstart,
 	Perl_pp_initfield,
@@ -1847,6 +1853,8 @@ INIT({
 	Perl_ck_null,		/* ceil */
 	Perl_ck_null,		/* floor */
 	Perl_ck_null,		/* is_tainted */
+	Perl_ck_null,		/* max */
+	Perl_ck_null,		/* min */
 	Perl_ck_helemexistsor,	/* helemexistsor */
 	Perl_ck_null,		/* methstart */
 	Perl_ck_null,		/* initfield */
@@ -2272,6 +2280,8 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x0000011e,	/* ceil */
 	0x0000011e,	/* floor */
 	0x00000106,	/* is_tainted */
+	0x00000406,	/* max */
+	0x00000406,	/* min */
 	0x00011300,	/* helemexistsor */
 	0x00000f00,	/* methstart */
 	0x00000f00,	/* initfield */
@@ -2977,6 +2987,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       78, /* ceil */
       78, /* floor */
        0, /* is_tainted */
+      -1, /* max */
+      -1, /* min */
      254, /* helemexistsor */
      256, /* methstart */
      258, /* initfield */
@@ -3504,6 +3516,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* CEIL       */ (OPpARG1_MASK|OPpTARGET_MY),
     /* FLOOR      */ (OPpARG1_MASK|OPpTARGET_MY),
     /* IS_TAINTED */ (OPpARG1_MASK),
+    /* MAX        */ (0),
+    /* MIN        */ (0),
     /* HELEMEXISTSOR */ (OPpARG1_MASK|OPpHELEMEXISTSOR_DELETE),
     /* METHSTART  */ (OPpARG1_MASK|OPpINITFIELDS),
     /* INITFIELD  */ (OPpARG1_MASK|OPpINITFIELD_AV|OPpINITFIELD_HV),

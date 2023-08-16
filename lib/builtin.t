@@ -400,6 +400,22 @@ TODO: {
     is($HASH{key}, "val", 'Lexically exported hash is accessible');
 }
 
+# min, max
+{
+    use builtin qw( min max );
+
+    my $v;
+
+    $v = min(9);
+    is($v, 9, 'single arg');
+
+    $v = min(1, 2);
+    is($v, 1, '2-arg ordered');
+
+    $v = min(2, 1);
+    is($v, 1, '2-arg reverse ordered');
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

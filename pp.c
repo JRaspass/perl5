@@ -7577,6 +7577,27 @@ PP_wrapped(pp_is_tainted, 1, 0)
     return NORMAL;
 }
 
+PP_wrapped(pp_max, 0, 1)
+{
+    SV *arg = *PL_stack_sp;
+
+    SvGETMAGIC(arg);
+
+    *PL_stack_sp = boolSV(SvTAINTED(arg));
+    return NORMAL;
+}
+
+PP_wrapped(pp_min, 0, 1)
+{
+    dSP; dMARK;
+
+    while (++MARK <= SP) {
+        sv_dump(MARK);
+    }
+
+    return NORMAL;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -7567,13 +7567,13 @@ PP_wrapped(pp_floor, 1, 0)
     RETURN;
 }
 
-PP_wrapped(pp_is_tainted, 1, 0)
+PP(pp_is_tainted)
 {
     SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    *PL_stack_sp = boolSV(SvTAINTED(arg));
+    rpp_replace_1_1(boolSV(SvTAINTED(*PL_stack_sp)));
     return NORMAL;
 }
 

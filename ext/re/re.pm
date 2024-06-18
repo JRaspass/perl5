@@ -1,10 +1,8 @@
-package re;
+package re 0.49;
 
 # pragma for controlling the regexp engine
-use strict;
-use warnings;
+use v5.40;
 
-our $VERSION     = "0.48";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
     is_regexp regexp_pattern
@@ -38,18 +36,17 @@ my %reflags = (
 );
 
 sub setcolor {
-    eval {  # Ignore errors
+    try {  # Ignore errors
         require Term::Cap;
 
-        my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+        my $terminal = Term::Cap->Tgetent({OSPEED => 9600}); # Avoid warning.
         my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
         my @props = split /,/, $props;
         my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
 
         $colors =~ s/\0//g;
         $ENV{PERL_RE_COLORS} = $colors;
-    };
-    if ($@) {
+    } catch ($e) {
         $ENV{PERL_RE_COLORS} ||= qq'\t\t> <\t> <\t\t';
     }
 }
@@ -97,8 +94,7 @@ if (defined &DynaLoader::boot_DynaLoader) {
 # We need to work for miniperl, because the XS toolchain uses Text::Wrap, which
 # uses re 'taint'.
 
-sub _load_unload {
-    my ($on)= @_;
+my sub load_unload ($on) {
     if ($on) {
         # We call install() every time, as if we didn't, we wouldn't
         # "see" any changes to the color environment var since
@@ -155,7 +151,7 @@ sub bits {
                                join(", ",sort keys %flags ) );
                 }
             }
-            _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
+            load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
             last;
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
 
@@ -163,7 +159,7 @@ sub bits {
             # in regcomp.h
             ${^RE_DEBUG_FLAGS} = $flags{'EXECUTE'} | $flags{'DUMP'};
             setcolor() if $s =~/color/i;
-            _load_unload($on);
+            load_unload($on);
             $seen_debug = 1;
         } elsif (exists $bitmask{$s}) {
             $bits |= $bitmask{$s};
@@ -286,7 +282,7 @@ sub bits {
     }
 
     if ($turning_all_off) {
-        _load_unload(0);
+        load_unload(0);
         $^H{reflags} = 0;
         $^H{reflags_charset} = 0;
         $^H &= ~$flags_hint;
@@ -295,17 +291,8 @@ sub bits {
     $bits;
 }
 
-sub import {
-    shift;
-    $^H |= bits(1, @_);
-}
-
-sub unimport {
-    shift;
-    $^H &= ~ bits(0, @_);
-}
-
-1;
+sub   import ($, @list) { $^H |=  bits(1, @list) }
+sub unimport ($, @list) { $^H &= ~bits(0, @list) }
 
 __END__
 

@@ -1,10 +1,8 @@
-package re;
+package re 0.48;
 
 # pragma for controlling the regexp engine
-use strict;
-use warnings;
+use v5.40;
 
-our $VERSION     = "0.47";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -41,7 +39,7 @@ sub setcolor {
  eval {				# Ignore errors
   require Term::Cap;
 
-  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+  my $terminal = Term::Cap->Tgetent({OSPEED => 9600}); # Avoid warning.
   my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
   my @props = split /,/, $props;
   my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
@@ -296,17 +294,8 @@ sub bits {
     $bits;
 }
 
-sub import {
-    shift;
-    $^H |= bits(1, @_);
-}
-
-sub unimport {
-    shift;
-    $^H &= ~ bits(0, @_);
-}
-
-1;
+sub   import ($, @list) { $^H |=  bits(1, @list) }
+sub unimport ($, @list) { $^H &= ~bits(0, @list) }
 
 __END__
 

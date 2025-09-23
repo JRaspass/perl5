@@ -7,9 +7,9 @@ use warnings;
 our $VERSION     = "0.48";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
-	is_regexp regexp_pattern
-	regname regnames regnames_count
-	regmust optimization
+    is_regexp regexp_pattern
+    regname regnames regnames_count
+    regmust optimization
 };
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
@@ -38,21 +38,20 @@ my %reflags = (
 );
 
 sub setcolor {
- eval {				# Ignore errors
-  require Term::Cap;
+    eval {  # Ignore errors
+        require Term::Cap;
 
-  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
-  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
-  my @props = split /,/, $props;
-  my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
+        my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+        my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
+        my @props = split /,/, $props;
+        my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
 
-  $colors =~ s/\0//g;
-  $ENV{PERL_RE_COLORS} = $colors;
- };
- if ($@) {
-    $ENV{PERL_RE_COLORS} ||= qq'\t\t> <\t> <\t\t';
- }
-
+        $colors =~ s/\0//g;
+        $ENV{PERL_RE_COLORS} = $colors;
+    };
+    if ($@) {
+        $ENV{PERL_RE_COLORS} ||= qq'\t\t> <\t> <\t\t';
+    }
 }
 
 my %flags = (
@@ -101,15 +100,15 @@ if (defined &DynaLoader::boot_DynaLoader) {
 sub _load_unload {
     my ($on)= @_;
     if ($on) {
-	# We call install() every time, as if we didn't, we wouldn't
-	# "see" any changes to the color environment var since
-	# the last time it was called.
+        # We call install() every time, as if we didn't, we wouldn't
+        # "see" any changes to the color environment var since
+        # the last time it was called.
 
-	# install() returns an integer, which if casted properly
-	# in C resolves to a structure containing the regexp
-	# hooks. Setting it to a random integer will guarantee
-	# segfaults.
-	$^H{regcomp} = install();
+        # install() returns an integer, which if casted properly
+        # in C resolves to a structure containing the regexp
+        # hooks. Setting it to a random integer will guarantee
+        # segfaults.
+        $^H{regcomp} = install();
     } else {
         delete $^H{regcomp};
     }
@@ -163,14 +162,14 @@ sub bits {
             # These default flags should be kept in sync with the same values
             # in regcomp.h
             ${^RE_DEBUG_FLAGS} = $flags{'EXECUTE'} | $flags{'DUMP'};
-	    setcolor() if $s =~/color/i;
-	    _load_unload($on);
+            setcolor() if $s =~/color/i;
+            _load_unload($on);
             $seen_debug = 1;
         } elsif (exists $bitmask{$s}) {
-	    $bits |= $bitmask{$s};
-	} elsif ($EXPORT_OK{$s}) {
-	    require Exporter;
-	    re->export_to_level(2, 're', $s);
+            $bits |= $bitmask{$s};
+        } elsif ($EXPORT_OK{$s}) {
+            require Exporter;
+            re->export_to_level(2, 're', $s);
         } elsif ($s eq 'strict') {
             if ($on) {
                 $^H{reflags} |= $reflags{$s};
@@ -190,19 +189,19 @@ sub bits {
                 # Turn off warnings if we turned them on.
                 warnings->unimport('regexp') if $^H{re_strict};
             }
-	    if ($^H{reflags}) {
+            if ($^H{reflags}) {
                 $^H |= $flags_hint;
             }
             else {
                 $^H &= ~$flags_hint;
             }
-	} elsif ($s =~ s/^\///) {
-	    my $reflags = $^H{reflags} || 0;
-	    my $seen_charset;
+        } elsif ($s =~ s/^\///) {
+            my $reflags = $^H{reflags} || 0;
+            my $seen_charset;
             my $x_count = 0;
-	    while ($s =~ m/( . )/gx) {
+            while ($s =~ m/( . )/gx) {
                 local $_ = $1;
-		if (/[adul]/) {
+                if (/[adul]/) {
                     # The 'a' may be repeated; hide this from the rest of the
                     # code by counting and getting rid of all of them, then
                     # changing to 'aa' if there is a repeat.
@@ -211,7 +210,7 @@ sub bits {
                         my $a_count = $s =~ s/a//g;
                         pos $s = $sav_pos - 1;  # -1 because got rid of the 'a'
                         if ($a_count > 2) {
-			    require Carp;
+                            require Carp;
                             Carp::carp(
                             qq 'The "a" flag may only appear a maximum of twice'
                             );
@@ -220,9 +219,9 @@ sub bits {
                             $_ = 'aa';
                         }
                     }
-		    if ($on) {
-			if ($seen_charset) {
-			    require Carp;
+                    if ($on) {
+                        if ($seen_charset) {
+                            require Carp;
                             if ($seen_charset ne $_) {
                                 Carp::carp(
                                 qq 'The "$seen_charset" and "$_" flags '
@@ -235,20 +234,20 @@ sub bits {
                                 .qq 'twice'
                                 );
                             }
-			}
-			$^H{reflags_charset} = $reflags{$_};
-			$seen_charset = $_;
-		    }
-		    else {
-			delete $^H{reflags_charset}
+                        }
+                        $^H{reflags_charset} = $reflags{$_};
+                        $seen_charset = $_;
+                    }
+                    else {
+                        delete $^H{reflags_charset}
                                      if defined $^H{reflags_charset}
                                         && $^H{reflags_charset} == $reflags{$_};
-		    }
-		} elsif (exists $reflags{$_}) {
+                    }
+                } elsif (exists $reflags{$_}) {
                     if ($_ eq 'x') {
                         $x_count++;
                         if ($x_count > 2) {
-			    require Carp;
+                            require Carp;
                             Carp::carp(
                             qq 'The "x" flag may only appear a maximum of twice'
                             );
@@ -259,21 +258,21 @@ sub bits {
                     }
 
                     $on
-		      ? $reflags |= $reflags{$_}
-		      : ($reflags &= ~$reflags{$_});
-		} else {
-		    require Carp;
-		    Carp::carp(
-		     qq'Unknown regular expression flag "$_"'
-		    );
-		    next ARG;
-		}
-	    }
-	    ($^H{reflags} = $reflags or defined $^H{reflags_charset})
-	                    ? $^H |= $flags_hint
-	                    : ($^H &= ~$flags_hint);
-	} else {
-	    require Carp;
+                      ? $reflags |= $reflags{$_}
+                      : ($reflags &= ~$reflags{$_});
+                } else {
+                    require Carp;
+                    Carp::carp(
+                     qq'Unknown regular expression flag "$_"'
+                    );
+                    next ARG;
+                }
+            }
+            ($^H{reflags} = $reflags or defined $^H{reflags_charset})
+                            ? $^H |= $flags_hint
+                            : ($^H &= ~$flags_hint);
+        } else {
+            require Carp;
             if ($seen_debug && defined $flags{$s}) {
                 Carp::carp("Use \"Debug\" not \"debug\", to list debug types"
                          . " in \"re\".  \"$s\" ignored");
@@ -283,7 +282,7 @@ sub bits {
                        join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
                        ")");
             }
-	}
+        }
     }
 
     if ($turning_all_off) {
@@ -321,15 +320,15 @@ re - Perl pragma to alter regular expression behaviour
 
     $pat = '(?{ $foo = 1 })';
     use re 'eval';
-    /foo${pat}bar/;		   # won't fail (when not under -T
+    /foo${pat}bar/;                # won't fail (when not under -T
                                    # switch)
 
     {
-	no re 'taint';		   # the default
-	($x) = ($^X =~ /^(.*)$/s); # $x is not tainted here
+        no re 'taint';             # the default
+        ($x) = ($^X =~ /^(.*)$/s); # $x is not tainted here
 
-	no re 'eval';		   # the default
-	/foo${pat}bar/;		   # disallowed (with or without -T
+        no re 'eval';              # the default
+        /foo${pat}bar/;            # disallowed (with or without -T
                                    # switch)
     }
 
@@ -340,11 +339,11 @@ re - Perl pragma to alter regular expression behaviour
     no re '/x';
     "FOO" =~ /foo/; # just /i implied
 
-    use re 'debug';		   # output debugging info during
-    /^(.*)$/s;			   # compile and run time
+    use re 'debug';                # output debugging info during
+    /^(.*)$/s;                     # compile and run time
 
 
-    use re 'debugcolor';	   # same as 'debug', but with colored
+    use re 'debugcolor';           # same as 'debug', but with colored
                                    # output
     ...
 

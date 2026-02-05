@@ -8,9 +8,15 @@
 # but essentially none of his code remains.
 
 package B::Deparse 1.89;
-use strict;
-use builtin qw( true false );
+
+use v5.40;
+
+use feature  ();    # For %feature::feature_bundle
+use strict   ();    # For &strict::bits
+use warnings ();    # For &warnings::bits
+
 use Carp;
+use Config;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPf_PARENS
@@ -59,10 +65,6 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
     );
 
 our $AUTOLOAD;
-use warnings ();
-require feature;
-
-use Config;
 
 BEGIN {
     # List version-specific constants here.
@@ -1041,7 +1043,7 @@ sub ambient_pragmas {
 		@names = split/\s+/, $val;
 	    }
 
-	    $warning_bits = $warnings::NONE if !defined ($warning_bits);
+	    $warning_bits //= $warnings::NONE;
 	    $warning_bits |= warnings::bits(@names);
 	}
 
@@ -2426,6 +2428,7 @@ sub declare_warnings {
     my ($self, $from, $to) = @_;
     $from //= '';
     my $all = warnings::bits("all");
+    no feature 'bitwise';
     unless (($from & ~$all) =~ /[^\0]/) {
         # no FATAL bits need turning off
         if (   $to eq $all) {
@@ -2978,9 +2981,7 @@ sub pp_scalar {
 }
 
 
-sub padval {
-    my $self = shift;
-    my $targ = shift;
+sub padval ($self, $targ) {
     return $self->{'curcv'}->PADLIST->ARRAYelt(1)->ARRAYelt($targ);
 }
 
@@ -6283,7 +6284,7 @@ sub tr_append_to_invlist {
 
     # Appends the range $current..$next-1 to the inversion list $list_ref
 
-    printf STDERR "%d: %d..%d %s", __LINE__, $current, $next, Dumper $list_ref if DEBUG;
+    printf STDERR "%d: %d..%d %s", __LINE__, $current, $next, Dumper($list_ref) if DEBUG;
 
     if (@$list_ref && $list_ref->[-1] == $current) {
 
@@ -6305,7 +6306,7 @@ sub tr_append_to_invlist {
         push @$list_ref, $next if defined $next;
     }
 
-    print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
+    print STDERR __LINE__, ": ", Dumper($list_ref) if DEBUG;
 }
 
 sub tr_invlist_to_string {
@@ -6314,7 +6315,7 @@ sub tr_invlist_to_string {
     # Stringify the inversion list $list_ref, possibly complementing it first.
     # CAUTION: this can modify $list_ref.
 
-    print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
+    print STDERR __LINE__, ": ", Dumper($list_ref) if DEBUG;
 
     if ($to_complement) {
 
@@ -6327,7 +6328,7 @@ sub tr_invlist_to_string {
             unshift @$list_ref, 0;
         }
 
-        print STDERR __LINE__, ": ", Dumper $list_ref if DEBUG;
+        print STDERR __LINE__, ": ", Dumper($list_ref) if DEBUG;
     }
 
     my $output = "";
@@ -7114,7 +7115,6 @@ sub pp_ceil       { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "ceil"); }
 sub pp_floor      { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "floor"); }
 sub pp_is_tainted { builtin1(@_, "is_tainted"); }
 
-1;
 __END__
 
 =head1 NAME
